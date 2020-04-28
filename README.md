@@ -922,17 +922,11 @@ Where we can paste the token we obtained before. Et voilá, we have access! You 
 
 Helm is a program for installing applications on Kubernetes, a bit like package managers like APT, DNF, Brew, etc. We’ll be using it in some of the next sections so we need to install it. You can find the instructions here (make sure to install version 3+):
 
-
-```
 https://helm.sh/docs/intro/install/
-```
-
-
 
 ### Metrics Server
 
-The Dashboard can even show us nice graphs about current usage and such, and for that we need to install the Metrics Server. We´re going to use Helm for that, so let’s first start by installing that.
-
+The Dashboard can even show us nice graphs about current usage and such, and for that we need to install the [Metrics Server](https://github.com/kubernetes-incubator/metrics-server). We´re going to use the Helm tool we just installed for that:
 
 ```
 helm install \
@@ -945,7 +939,7 @@ extraArgs.kubelet-insecure-tls=true \
   bitnami/metrics-server
 ```
 
-(The `extraArgs` settings were necessary in my case or it just wouldn't connect to any of the nodes. See comments on [this issue]( https://github.com/kubernetes-sigs/metrics-server/issues/167#issuecomment-469914560) for more information)
+(The `extraArgs` settings were necessary in my case or it just wouldn't connect to any of the nodes. The [installation docs](https://github.com/bitnami/charts/tree/master/bitnami/metrics-server/) don't really mention it, but see comments on [this issue]( https://github.com/kubernetes-sigs/metrics-server/issues/167#issuecomment-469914560) for more information)
 
 After a couple of minutes the Dashboard should update its interface and you’ll start to see things like this:
 
