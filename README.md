@@ -1226,6 +1226,13 @@ If you don’t get `HEALTH_OK` check [Ceph common issues](https://rook.io/docs/r
 
 #### Provision Storage
 
+And finally we need to define a store class. As far as I understand it what we have so far is just a big bag of bits
+and no way to access them. The storage class defines the way (the protocal? the API?) we want to manage those bits.
+In this case we're using [Block Storage](https://rook.io/docs/rook/v1.3/ceph-block.html) which, AFAIU, shows up as
+a block device or disk to Pods. These are private to a Pod and can't / won't be shared. But they are persistent so
+if a Pod gets restarted it's data is still there.
+
+To install this storage class and block pool we simply run:
 
 ```
 cat > rook-ceph-storageclass.yml <<EOF
@@ -1262,12 +1269,12 @@ EOF
 kubectl apply -f rook-ceph-storageclass.yml
 ```
 
-
+There are other storate classes provided by Ceph: [Object Storage](https://rook.io/docs/rook/v1.3/ceph-object.html)
+(like Amazon S3) and a [Shared Filesystem](https://rook.io/docs/rook/v1.3/ceph-filesystem.html). We won't discuss those here.
 
 #### Ceph Dashboard
 
 There’s also a Dashboard you can access for this cluster. All the documentation can be found [here](https://rook.io/docs/rook/v1.3/ceph-dashboard.html). The “Enable the Ceph Dashboard” and “Configure the Dashboard” sections can be skipped because we already did all that. For making the dashboard publically available we can apply this Ingress:
-
 
 ```
 cat > ceph-dashboard-ingress.yml <<EOF
