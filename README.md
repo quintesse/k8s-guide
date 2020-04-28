@@ -954,9 +954,9 @@ So far we haven’t really handled how we will expose our services to the outsid
 
 So that’s what [NGINX Ingress Controller](https://github.com/kubernetes/ingress-nginx) is for, it will allow us to associate hostnames with our services. We’ve already set up a wild-card *.apps.k8s.example.com pointing to our **Kube1** node which means that we can use any subdomain for our services.
 
-It does mean that all outside traffic comes in on a single node, there’s no load balancing possible here. But realistically our cluster is never going to be used for high-traffic services, so that’s okay.
+It *does* mean that all outside traffic comes in on a single node, there’s no load balancing possible here. But realistically our cluster is never going to be used for high-traffic services, so that’s okay.
 
-It does mean that we have to make sure that this ingress controller is not scheduled like any other service but that it’s _always_ started on **Kube1**. Again we will use Helm to install things but this time the configuration is a bit too complex to just pass on the command line, so first we’ll make a values file:
+It also means that we have to make sure that this ingress controller is not scheduled like any other service but that it’s _always_ started on **Kube1**. Again we will use Helm to install things but this time the configuration is a bit too complex to just pass on the command line, so first we’ll make a values file:
 
 
 ```
