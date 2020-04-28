@@ -1311,7 +1311,7 @@ EOF
 kubectl apply -f ceph-dashboard-ingress.yml
 ```
 
-*TODO: figure out why the browser still keeps complaining about an invlaid license.
-I think it's because the internal service also usas TLS but with a self-signed certificate.
+*TODO: figure out why the browser still keeps complaining about an invalid license.
+I think it's because the internal service also uses TLS but with a self-signed certificate.
 Pehaps we should try turning that off and trust nobody will be able to access that internal
 service from the outside anyway*
