@@ -839,7 +839,7 @@ rm -rf /etc/cni
 
 #### Removing taint
 
-By default our cluster won’t schedule any work on the master node, reserving it for system applications for security reasons. In our case we don’t really care about that and we sure don’t want all those resources go unused! So run the following to allow pods to run anywhere (taken from [Kubernetes docs](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#control-plane-node-isolation)):
+By default our cluster won’t schedule any work on the master node, reserving it for system applications for security reasons. In our case we don’t really care about that and we sure don’t want all those resources to go unused! So run the following to allow pods to run anywhere (taken from [Kubernetes docs](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#control-plane-node-isolation)):
 
 ```
 kubectl taint nodes --all node-role.kubernetes.io/master-
@@ -849,7 +849,6 @@ You should see something like:
 
 ![alt_text](images/kubectl_taint.png)
 
-
 ### Dashboard
 
 Now let’s install the [Kubernetes Dashboard](https://github.com/kubernetes/dashboard/blob/master/README.md), a Web UI you can use to inspect and manage most of the Kubernetes internals:
@@ -858,10 +857,10 @@ Now let’s install the [Kubernetes Dashboard](https://github.com/kubernetes/das
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
 ```
 
-But we’ll need to [create a user](https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md) to be able to log into the UI. To do that create a file, let’s call it dashboard-admin-user.yml (just create it anywhere), with the necessary settings:
-
+But we’ll need to [create a user](https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md) to be able to log into the UI. Just run the following that will apply the necessary settings:
 
 ```
+cat > dashboard-admin-user.yml <<EOF
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -880,24 +879,15 @@ subjects:
 - kind: ServiceAccount
   name: admin-user
   namespace: kubernetes-dashboard
-```
-
-
-And apply it:
-
-
-```
+EOF
 kubectl apply -f dashboard-admin-user.yml
 ```
 
-
 Using the following command you can now get the token to log in with:
-
 
 ```
 kubectl -n kubernetes-dashboard get secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}') -o jsonpath='{.data.token}'
 ```
-
 
 Because we don’t have a proper way yet to access the cluster from “the outside” we’ll make use of a temporary proxy to connect to our new dashboard. Run the following comamnd in a terminal on a computer with a browser and where you have set up kubectl:
 
