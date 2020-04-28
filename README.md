@@ -169,10 +169,10 @@ And then we do this for the other two servers too.
 Now that are servers are partitioned and rebooted we can log into them to do the rest of the work.
 I'd suggest opening up 3 terminal windows, one for each server, because many actions will have to
 be duplicated exactly or in a very similart way at least on each server. It's easier to just copy
-once and paste 3 times and let them work in parallel. So again type:
+once and paste 3 times and let them work in parallel. So type:
 
 ```
-ssh root@<NODE_IP>
+ssh root@<NODE_NAME>.k8s.example.com
 ```
 
 But this time use the password sent to you by the hosting provider.
