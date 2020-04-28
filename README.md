@@ -316,7 +316,7 @@ ufw enable
 
 #### Wireguard
 
-Now let’s install [Wireguard](https://www.wireguard.com/install/) on **Kube1**.
+Now let’s install [Wireguard](https://www.wireguard.com/install/) on all nodes.
 And because we’re using Ubuntu 18 we have to set up the repository first.
 
 ```
