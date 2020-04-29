@@ -1,4 +1,9 @@
-== Hobbyist Kubernetes on bare-metal
+
+:toc:
+:toc-placement!:
+:toclevels: 4
+
+= Hobbyist Kubernetes on bare-metal
 
 So while we're in this quarantine with nothing better to do I decided
 that I wanted to set up my own Kubernetes cluster. Partly because I
@@ -26,7 +31,9 @@ worthwhile for people to read.
 So this is my guide. Wherever possible I've linked to the origin of the
 information so you can read things for yourself.
 
-=== Setting up the cluster
+toc::[]
+
+== Setting up the cluster
 
 So next thing to do is getting the hardware, setting up DNS entries and
 in general making sure everything is ready for installing Kubernetes.
@@ -73,7 +80,7 @@ And I also set the PTR records at the hosting provider:
 So node *Kube1* will be our master server, the "control plane" of our
 cluster.
 
-==== Choosing a cloud provider
+=== Choosing a cloud provider
 
 One of the requirements I had was that I wanted something that could run
 "real" applications, I didn't just want a toy to play around with and
@@ -91,16 +98,16 @@ servers], specifically:
 
 4CPU, 8GB mem, 200GB disk
 
-==== Choosing an operating system
+=== Choosing an operating system
 
 https://releases.ubuntu.com/18.04.4/[Ubuntu 18 LTS]
 
 It’s one of the options they provide and has long term support so that
 should be okay.
 
-==== System setup
+=== System setup
 
-===== Rename servers
+==== Rename servers
 
 We’ll call our servers “kube1”, “kube2”, …, “kubeN”.
 
@@ -109,7 +116,7 @@ select “Server Name” from the “Manage” menu:
 
 image:images/servers.png[alt_text]
 
-===== Repartition disks
+==== Repartition disks
 
 The provider gives us the disk for each server as one big partition. I
 thought this would be okay because Patrick's guide shows us how to use
@@ -198,7 +205,7 @@ reboot
 
 And then we do this for the other two servers too.
 
-===== Login
+==== Login
 
 Now that are servers are partitioned and rebooted we can log into them
 to do the rest of the work. I'd suggest opening up 3 terminal windows,
@@ -251,7 +258,7 @@ the hosting provder. Rebooting seemed to help, so just to be sure, type:
 reboot
 ....
 
-===== Prepare SSH
+==== Prepare SSH
 
 Now before logging in again we'll first make that a bit simpler by
 copying an SSH key to each node. First we have to generate a
@@ -281,7 +288,7 @@ After that you can log into the servers using SSH:
 ssh root@<NODE_NAME>.k8s.example.com
 ....
 
-===== Get rid of swap
+==== Get rid of swap
 
 The next thing we’ll do is turn off swap which is something Kubernetes
 doesn’t like much. Run this command on each server:
@@ -292,7 +299,7 @@ swapoff -a
 
 Now edit the `/etc/fstab` file and remove the line that mentions “swap”.
 
-===== Some miscellaneous bits
+==== Some miscellaneous bits
 
 Just making sure that some commands further on in this guide will work.
 Run these on each node.
@@ -306,7 +313,7 @@ echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
 sysctl -p
 ....
 
-===== Installing Docker
+==== Installing Docker
 
 To install and set up Docker we’ll have to run the following on each
 node:
@@ -342,9 +349,9 @@ systemctl restart docker
 systemctl enable docker.service
 ....
 
-==== Security
+=== Security
 
-===== Firewall
+==== Firewall
 
 We’ll be following the instruction from the guide to set up the firewall
 on each of the servers using
@@ -359,7 +366,7 @@ ufw default deny incoming
 ufw enable
 ....
 
-===== Wireguard
+==== Wireguard
 
 Now let’s install https://www.wireguard.com/install/[Wireguard] on all
 nodes. And because we’re using Ubuntu 18 we have to set up the
@@ -505,9 +512,9 @@ cat >> /etc/hosts <<EOF
 EOF
 ....
 
-=== Installing K8s (using `kubeadm`)
+== Installing K8s (using `kubeadm`)
 
-==== Etcd
+=== Etcd
 
 Execute the following to download and install https://etcd.io/[etcd] on
 each server:
@@ -619,7 +626,7 @@ We can test it all works correctly by running:
 /opt/etcd/etcdctl member list
 ....
 
-==== Kubernetes
+=== Kubernetes
 
 Let’s install the packages necessary to run Kubernetes. We only do this
 on *Kube1*, our master node:
@@ -778,7 +785,7 @@ ufw allow in on weave
 ufw reload
 ....
 
-===== Joining the worker nodes
+==== Joining the worker nodes
 
 Now it’s time to add the other nodes to our cluster!
 
@@ -849,7 +856,7 @@ When all pods show “Running” everything is good.
 
 *Yay! We’ve done it!*
 
-===== Troubleshooting
+==== Troubleshooting
 
 If at any time you feel the need to start all over you can run the
 following on each node which will get rid of the local Kubernetes setup
@@ -873,7 +880,7 @@ And finally get rid of the CNI configuration:
 rm -rf /etc/cni
 ....
 
-===== Removing taint
+==== Removing taint
 
 By default our cluster won’t schedule any work on the master node,
 reserving it for system applications for security reasons. In our case
@@ -891,7 +898,7 @@ You should see something like:
 
 image:images/kubectl_taint.png[alt_text]
 
-==== Dashboard
+=== Dashboard
 
 Now let’s install the
 https://github.com/kubernetes/dashboard/blob/master/README.md[Kubernetes
@@ -962,7 +969,7 @@ access! You should see something like this:
 
 image:images/k8s_dashboard2.png[alt_text]
 
-==== Helm
+=== Helm
 
 Helm is a program for installing applications on Kubernetes, a bit like
 package managers like APT, DNF, Brew, etc. We’ll be using it in some of
@@ -971,7 +978,7 @@ instructions here (make sure to install version 3+):
 
 https://helm.sh/docs/intro/install/[https://helm.sh/docs/intro/install/]
 
-==== Metrics Server
+=== Metrics Server
 
 The Dashboard can even show us nice graphs about current usage and such,
 and for that we need to install the
@@ -1001,7 +1008,7 @@ you’ll start to see things like this:
 
 image:images/k8s_dashboard3.png[alt_text]
 
-==== Ingress
+=== Ingress
 
 So far we haven’t really handled how we will expose our services to the
 outside world. We only have a couple of static IP addresses and opening
@@ -1054,7 +1061,7 @@ helm install \
   -f helm-ingress-values.xml
 ....
 
-==== Cert Manager
+=== Cert Manager
 
 Now that people can access our apps from the outside world we will want
 to protect those communications with proper encryption. For that we’ll
@@ -1144,7 +1151,7 @@ and
 https://cert-manager.io/docs/tutorials/acme/ingress/#step-7-deploy-a-tls-ingress-resource[here]
 to verify that everything is working correctly.
 
-==== Distributed Storage
+=== Distributed Storage
 
 The final piece to finish our Kubernetes puzzle is storage. Without that
 there’s a lot of apps we couldn’t run. So we’re going to use all the
@@ -1163,7 +1170,7 @@ could assign an entire partition exclusively to Rook (well actually
 https://rook.io/docs/rook/v1.3/ceph-storage.html[Ceph], but that’s
 another story).
 
-===== Set up the Cluster
+==== Set up the Cluster
 
 First we add the necessary Helm repository:
 
@@ -1292,7 +1299,7 @@ If you don’t get `HEALTH_OK` check
 https://rook.io/docs/rook/v1.3/ceph-common-issues.html[Ceph common
 issues] for possible solutions.
 
-===== Provision Storage
+==== Provision Storage
 
 And finally we need to define a store class. As far as I understand it
 what we have so far is just a big bag of bits and no way to access them.
@@ -1346,7 +1353,7 @@ is like Amazon S3) and a
 https://rook.io/docs/rook/v1.3/ceph-filesystem.html[Shared Filesystem].
 We won't discuss those here.
 
-===== Ceph Dashboard
+==== Ceph Dashboard
 
 There’s also a Dashboard you can access for this cluster. All the
 documentation can be found
