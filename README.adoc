@@ -978,6 +978,13 @@ instructions here (make sure to install version 3+):
 
 https://helm.sh/docs/intro/install/[https://helm.sh/docs/intro/install/]
 
+Make sure you've installed the default stable repository:
+
+```
+helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+helm repo update
+```
+
 === Metrics Server
 
 The Dashboard can even show us nice graphs about current usage and such,
