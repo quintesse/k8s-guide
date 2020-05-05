@@ -1033,20 +1033,21 @@ first we’ll make a values file:
 
 ....
 cat > helm-ingress-values.yml <<EOF
-tolerations:
-- key: node-role.kubernetes.io/master
-  operator: Equal
-  effect: NoSchedule
-affinity:
-  nodeAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: node-role.kubernetes.io/master
-          operator: Exists
-hostNetwork: true
-dnsPolicy: ClusterFirstWithHostNet
-reportNodeInternalIp: true
+controller:
+  tolerations:
+  - key: node-role.kubernetes.io/master
+    operator: Equal
+    effect: NoSchedule
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: node-role.kubernetes.io/master
+            operator: Exists
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+  reportNodeInternalIp: true
 EOF
 ....
 
@@ -1057,7 +1058,7 @@ helm install \
   --namespace ingress \
   --create-namespace \
   ingress \
-  bitnami/nginx-ingress-controller \
+  stable/nginx-ingress \
   -f helm-ingress-values.xml
 ....
 
