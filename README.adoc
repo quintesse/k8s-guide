@@ -990,7 +990,15 @@ helm repo update
 The Dashboard can even show us nice graphs about current usage and such,
 and for that we need to install the
 https://github.com/kubernetes-incubator/metrics-server[Metrics Server].
-We´re going to use the Helm tool we just installed for that:
+We´re going to use the Helm tool we just installed for that. First we add the necessary
+Helm repository:
+
+```
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+```
+
+And then we do the actuall installation:
 
 ....
 helm install \
