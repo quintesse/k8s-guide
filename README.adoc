@@ -1123,7 +1123,7 @@ spec:
     # The ACME server URL
     server: https://acme-staging-v02.api.letsencrypt.org/directory
     # Email address used for ACME registration
-    email: tako@codejive.org
+    email: tako@example.com
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
       name: letsencrypt-testing
@@ -1143,7 +1143,7 @@ spec:
     # The ACME server URL
     server: https://acme-v02.api.letsencrypt.org/directory
     # Email address used for ACME registration
-    email: tako@codejive.org
+    email: tako@example.com
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
       name: letsencrypt
@@ -1422,3 +1422,86 @@ invalid license. I think it's because the internal service also uses TLS
 but with a self-signed certificate. Pehaps we should try turning that
 off and trust nobody will be able to access that internal service from
 the outside anyway_
+
+=== OAuth2
+
+With the final piece installed it doesn't mean we're finished of course. There's
+still a lot of other things we could install. One very important part is authentication
+and authorization. If our cluster is publically accessible we don't want to just let
+anyone inside!
+
+For now we're going to install a fairly simple component called
+https://oauth2-proxy.github.io/oauth2-proxy/[oauth2-proxy]. I basically followed
+the instructions from this article
+https://www.digitalocean.com/community/tutorials/how-to-protect-private-kubernetes-services-behind-a-github-login-with-oauth2_proxy[How to Protect Private Kubernetes Services Behind a GitHub Login with oauth2_proxy].
+But some minor things had to be changed to make things work.
+
+For this guide I'm going to use GitHub authentication because it's an account that most
+people I'd give acces to my cluster to will have and the setup is really easy. I got
+stuck on the Google authentication setup because the docs are out-of-date and I wasn't
+able to make things work (issue opened, will update the guide if I get things to work in
+the future).
+
+Let's first start by creating a namespace (normally I do this as part of the Helm install
+command, but here I want to make sure some other things are set up first, so we do
+it manually):
+
+```
+kubectl create ns oauth2
+```
+
+See https://oauth2-proxy.github.io/oauth2-proxy/auth-configuration#github-auth-provider[GitHub Auth Provider]
+for instructions on how to set up a GitHub OAuth application. Make sure you copy the Client ID
+and Client Secret for use in the next step.
+
+We also need a Cookie which you can generate here: https://generate.plus/en/base64
+
+Next we need to create a secret holding those values:
+
+```
+kubectl -n oauth2 create secret generic oauth2-proxy-creds \
+  --from-literal=cookie-secret=<GENERATED_COOKIE> \
+  --from-literal=client-id=<GITHUB_CLIENT_ID> \
+  --from-literal=client-secret=<GITHUB_CLIENT_SECRET>
+```
+
+Now we need to create our configuration file, eg `oauth2-proxy-helm-values.yml`:
+
+```
+config:
+  existingSecret: oauth2-proxy-creds
+
+extraArgs:
+  whitelist-domain: .apps.k8s.example.com
+  cookie-domain: .apps.k8s.example.com
+  provider: github
+
+authenticatedEmailsFile:
+  enabled: true
+  restricted_access: |-
+    tako@example.com
+    someone@example.com
+    example@gmail.com
+
+ingress:
+  enabled: true
+  path: /
+  hosts:
+    - auth.apps.k8s.example.com
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt
+  tls:
+    - secretName: oauth2-proxy-https-cert
+      hosts:
+        - auth.apps.k8s.example.com
+```
+
+Make sure to use the host names particular to your use-case. The email addresses in
+the `restricted_access` option are the people that will be granted access.
+
+Now let's install the proxy itself:
+
+```
+helm install -n oath2 oath2-proxy stable/oauth2-proxy -f oauth2-proxy-helm-values.yml
+```
