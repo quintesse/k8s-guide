@@ -1114,15 +1114,16 @@ Now we just need to tell it where to get the certificates from:
 ....
 cat > letsencrypt-issuer.yml <<EOF
 apiVersion: cert-manager.io/v1alpha2
-kind: Issuer
+kind: ClusterIssuer
 metadata:
   name: letsencrypt-testing
+  namespace: cert-manager
 spec:
   acme:
     # The ACME server URL
     server: https://acme-staging-v02.api.letsencrypt.org/directory
     # Email address used for ACME registration
-    email: tako@example.com
+    email: tako@codejive.org
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
       name: letsencrypt-testing
@@ -1133,15 +1134,16 @@ spec:
           class:  nginx
 ---
 apiVersion: cert-manager.io/v1alpha2
-kind: Issuer
+kind: ClusterIssuer
 metadata:
   name: letsencrypt
+  namespace: cert-manager
 spec:
   acme:
     # The ACME server URL
     server: https://acme-v02.api.letsencrypt.org/directory
     # Email address used for ACME registration
-    email: tako@example.com
+    email: tako@codejive.org
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
       name: letsencrypt
@@ -1163,8 +1165,10 @@ of throw-away certificates.
 
 You can look at the documentation
 https://cert-manager.io/docs/installation/kubernetes/#verifying-the-installation[here]
-and
+,
 https://cert-manager.io/docs/tutorials/acme/ingress/#step-7-deploy-a-tls-ingress-resource[here]
+and
+https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nginx-ingress-with-cert-manager-on-digitalocean-kubernetes[here]
 to verify that everything is working correctly.
 
 === Distributed Storage
