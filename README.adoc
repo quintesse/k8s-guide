@@ -1500,7 +1500,7 @@ ingress:
 Make sure to use the host names particular to your use-case. The email addresses in
 the `restricted_access` option are the people that will be granted access.
 
-Now let's install the proxy itself:
+Now let's install the https://hub.helm.sh/charts/stable/oauth2-proxy[oauth2-proxy chart] itself:
 
 ```
 helm install -n oath2 oath2-proxy stable/oauth2-proxy -f oauth2-proxy-helm-values.yml
