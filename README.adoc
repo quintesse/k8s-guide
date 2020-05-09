@@ -1425,6 +1425,8 @@ the outside anyway_
 
 === OAuth2
 
+_WARNING: This part is still a work in progress. It works but I'm not really happy with it._
+
 With the final piece installed it doesn't mean we're finished of course. There's
 still a lot of other things we could install. One very important part is authentication
 and authorization. If our cluster is publically accessible we don't want to just let
