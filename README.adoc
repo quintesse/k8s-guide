@@ -685,17 +685,9 @@ mkdir -p $HOME/.kube
 ln -s /etc/kubernetes/admin.conf $HOME/.kube/config
 ....
 
-We can even do this remotely, from our comfortable chair at home, on any
-computer not inside our cluster, by running:
+Let's see if we can properly run `kubectl`:
 
 ....
-scp root@kube1.k8s.example.com:/root/.kube/config ~/.kube
-....
-
-If we’ve got `kubectl` installed we can now simply use it, like this:
-
-....
-kubectl config set-cluster my-first-cluster-name --server=https://api.k8s.example.com:6443
 kubectl version
 ....
 
@@ -878,6 +870,28 @@ And finally get rid of the CNI configuration:
 ....
 rm -rf /etc/cni
 ....
+
+==== Working remotely
+
+If everything is working as it should it means we're now done working on the nodes directly.
+We should be able to do all the remaining work remotely. So run the following on any computer
+you want to be able to access your cluster from:
+
+....
+scp root@kube1.k8s.example.com:/root/.kube/config ~/.kube
+....
+
+If we’ve got `kubectl` installed locally we can now simply use it, like this:
+
+....
+kubectl config set-cluster my-first-cluster-name --server=https://api.k8s.example.com:6443
+kubectl version
+....
+
+And you should see the same output as we saw above.
+
+*WARNING*: That Kube Config file gives anyone who has access to it complete control over your
+cluster so be careful about who is able to read it or leaving copies lying around!
 
 ==== Removing taint
 
