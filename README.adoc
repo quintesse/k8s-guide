@@ -817,9 +817,9 @@ KUBELET_EXTRA_ARGS=--node-ip=10.0.1.3
 EOF
 ....
 
-And now we run the `kubeadm join` command we copied earlier. It will
-look like this but we added `--node-name` to it which we’ll set to
-`kube2` and `kube3` on the respective nodes:
+And now we run the `kubeadm join` command we copied earlier on each of the remaining nodes.
+It will look like this but I've added `--node-name` to it which we’ll set to `kube2` and `kube3`
+on the respective nodes:
 
 ....
 kubeadm join 10.0.1.1:6443 --token <TOKEN> \
