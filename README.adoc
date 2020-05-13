@@ -665,7 +665,7 @@ etcd:
     - http://10.0.1.1:2379
     - http://10.0.1.2:2379
     - http://10.0.1.3:2379
-clusterName: "takida-cluster"
+clusterName: "my-first-cluster-name"
 ....
 
 And finally let’s create our Kubernetes Control Plane, our master node!
@@ -695,7 +695,7 @@ scp root@kube1.k8s.example.com:/root/.kube/config ~/.kube
 If we’ve got `kubectl` installed we can now simply use it, like this:
 
 ....
-kubectl config set-cluster takida-cluster --server=https://api.k8s.example.com:6443
+kubectl config set-cluster my-first-cluster-name --server=https://api.k8s.example.com:6443
 kubectl version
 ....
 
