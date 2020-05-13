@@ -781,9 +781,8 @@ ufw reload
 Now it’s time to add the other nodes to our cluster!
 
 First we make sure the node kubelets
-https://www.google.com/url?q=https://propellered.com/posts/kubernetes/&sa=D&ust=1588093046065000&usg=AFQjCNEc0ATAwKTjOLyP4qNozVkJWRbS1Q[get
-initialized with the correct internal ip] by running the following on
-the appropriate nodes:
+https://propellered.com/posts/kubernetes[get initialized with the correct internal ip]
+by running the following on the appropriate nodes:
 
 *Kube1*
 
