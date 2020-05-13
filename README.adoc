@@ -956,7 +956,7 @@ kubectl apply -f dashboard-admin-user.yml
 Using the following command you can now get the token to log in with:
 
 ....
-kubectl -n kubernetes-dashboard get secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}') -o jsonpath='{.data.token}'
+kubectl -n kubernetes-dashboard get secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}') -o jsonpath='{.data.token}' | base64 -d
 ....
 
 Because we don’t have a proper way yet to access the cluster from “the
