@@ -628,8 +628,7 @@ We can test it all works correctly by running:
 
 === Kubernetes
 
-Let’s install the packages necessary to run Kubernetes. We only do this
-on *Kube1*, our master node:
+Let’s install the packages necessary to run Kubernetes. We do this by running the following on all nodes:
 
 ....
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
@@ -641,8 +640,8 @@ sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
 ....
 
-We now create a configuration file, let’s call it master-config.yml
-(just create it anywhere) with the necessary settings for our cluster:
+And now on *Kube1*, the master node, we create a configuration file, let’s call it
+master-config.yml (just create it anywhere) with the necessary settings for our cluster:
 
 ....
 apiVersion: kubeadm.k8s.io/v1beta2
