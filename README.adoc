@@ -971,9 +971,7 @@ kubectl proxy
 We can now access the cluster’s API server which is where the dashboard
 is located:
 
-....
 http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
-....
 
 This will show a page like this:
 
