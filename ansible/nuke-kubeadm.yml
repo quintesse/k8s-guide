@@ -1,0 +1,25 @@
+---
+# This playbook removes a Kubernetes cluster
+
+- name: apply common configuration to all nodes
+  hosts: nodes
+  remote_user: root
+  any_errors_fatal: true
+
+  tasks:
+  - name: Reset node
+    command:
+      cmd: kubeadm reset
+    changed_when: false
+
+  - name: Clear etcd database
+    command:
+      cmd: /opt/etcd/etcdctl del "" --from-key=true
+    environment:
+      ETCDCTL_API: '3'
+    changed_when: false
+
+  - name: Delete CNI configuration
+    file:
+      path: /etc/cni
+      state: absent
