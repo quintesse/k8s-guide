@@ -22,3 +22,7 @@
 #    reboot:
     debug:
       msg: Should reboot now...
+
+  - name: restart_ufw
+    community.general.ufw:
+      state: reloaded

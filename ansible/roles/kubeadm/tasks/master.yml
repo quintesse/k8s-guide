@@ -1,0 +1,37 @@
+---
+# tasks file setting up a K8s master node
+- name: Create master configuration
+  template:
+    src: master-config.yml.j2
+    dest: /opt/master-config.yml
+    mode: 0644
+
+- name: Set up master node
+  command:
+    cmd: kubeadm init --config /opt/master-config.yml
+    creates: /etc/kubernetes/admin.conf
+
+- name: Create symbolic link
+  file:
+    src: /etc/kubernetes/admin.conf
+    dest: '{{ ansible_env.HOME }}/.kube/config'
+    state: link
+
+- name: Read K8s PKI cert
+  slurp:
+    src: /etc/kubernetes/pki/ca.crt
+  register: cert
+
+- name: Set the private key as a host fact
+  set_fact:
+    ca_cert_hash: "{{ cert['content'] | b64decode | spki_fingerprint }}"
+
+- name: Retrieve bootstrap master token
+  command:
+    cmd: kubeadm token list -o json
+  register: token_json
+  changed_when: false
+
+- name: Set the token as a host fact
+  set_fact:
+    bootstrap_token: "{{ (token_json.stdout | from_json).token }}"

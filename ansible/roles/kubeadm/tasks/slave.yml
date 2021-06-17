@@ -1,0 +1,11 @@
+---
+# tasks file setting up a K8s slave node
+- name: Join cluster
+  command:
+    cmd: kubeadm join {{ master_ip }}:6443 --node-name {{ shortname }} --token {{ token }} --discovery-token-ca-cert-hash sha256:{{ ca_cert_hash }}
+    creates: /etc/kubernetes/kubelet.conf
+  vars:
+    master_name: "{{ groups['nodes'][0] }}"
+    master_ip: "{{ hostvars[master_name]['ansible_default_ipv4']['address'] }}"
+    token: "{{ hostvars[master_name]['bootstrap_token'] }}"
+    ca_cert_hash: "{{ hostvars[master_name]['ca_cert_hash'] }}"

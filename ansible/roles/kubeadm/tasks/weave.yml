@@ -1,0 +1,25 @@
+---
+# tasks file for setting up overlay network
+- name: Creating overlay route service
+  template:
+    src: overlay-route.service.j2
+    dest: /etc/systemd/system/overlay-route.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Starting overlay route service
+  systemd:
+    name: 'overlay-route'
+    enabled: yes
+    state: started
+  notify: restart_ufw
+
+- name: UFW - Allow incoming Weave traffic
+  community.general.ufw:
+    rule: allow
+    interface: weave
+    direction: in
+    state: enabled
+  notify:
+  - restart_ufw

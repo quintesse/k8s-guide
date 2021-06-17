@@ -1,7 +1,7 @@
 ---
 # handlers
 - name: restart_etcd
-  ansible.builtin.systemd:
+  systemd:
     name: 'etcd'
     enabled: yes
     state: restarted

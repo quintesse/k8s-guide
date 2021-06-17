@@ -15,15 +15,18 @@
     name: [ 'kubeadm', 'kubectl', 'kubelet' ]
     state: present
 
-- name: Create master configuration
+- name: Create Kubelet configuration
   template:
-    src: master-config.yml.j2
-    dest: /opt/master-config.yml
+    src: kubelet.j2
+    dest: /etc/default/kubelet
+    owner: root
+    group: root
     mode: 0644
+
+- name: Setup K8s master node
+  include_tasks: master.yml
   when: inventory_hostname == groups['nodes'][0]
 
-- name: Set up master node
-  command:
-    cmd: kubeadm init --config /opt/master-config.yml --node-name master
-    creates: /etc/kubernetes/admin.conf
-  when: inventory_hostname == groups['nodes'][0]
+- name: Setup K8s slave nodes
+  include_tasks: slave.yml
+  when: inventory_hostname != groups['nodes'][0]
