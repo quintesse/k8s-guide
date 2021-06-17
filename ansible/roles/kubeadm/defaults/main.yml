@@ -1,0 +1,4 @@
+---
+# default vars
+cluster_name: 'a-kubernetes-cluster'
+api_domain: api.k8s.example.com

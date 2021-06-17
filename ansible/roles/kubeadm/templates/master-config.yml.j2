@@ -1,0 +1,22 @@
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: {{ internal_ip }}
+  bindPort: 6443
+nodeRegistration:
+  name: {{ shortname }}
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+certificatesDir: /etc/kubernetes/pki
+apiServer:
+  certSANs:
+  - {{ hostvars[inventory_hostname].ansible_default_ipv4.address }}
+  - {{ api_domain }}
+etcd:
+  external:
+    endpoints:
+{% for item in groups['nodes'] %}
+    - http://{{ hostvars[item]['internal_ip'] }}:2379
+{% endfor %}
+clusterName: "{{ cluster_name }}"

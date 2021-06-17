@@ -1,0 +1,14 @@
+---
+# Just a dummy file for testing purposes
+
+- name: apply common configuration to all nodes
+  hosts: nodes
+  remote_user: root
+  any_errors_fatal: true
+
+  roles:
+  - kubeadm
+
+  tasks:
+  - debug:
+      msg: "{{ api_domain }}"

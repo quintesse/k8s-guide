@@ -10,6 +10,7 @@
   - lowlevel_setup
   - wireguard
   - etcd
+  - kubeadm
 
   tasks:
 #  - name: Display all variables/facts known for a host

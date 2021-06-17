@@ -1,0 +1,29 @@
+---
+# tasks file setting up K8s using Kubeadm
+- name: Add Google Cloud key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Configure Kubernetes repository
+  apt_repository:
+    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+
+- name: Install Kube tools
+  apt:
+    name: [ 'kubeadm', 'kubectl', 'kubelet' ]
+    state: present
+
+- name: Create master configuration
+  template:
+    src: master-config.yml.j2
+    dest: /opt/master-config.yml
+    mode: 0644
+  when: inventory_hostname == groups['nodes'][0]
+
+- name: Set up master node
+  command:
+    cmd: kubeadm init --config /opt/master-config.yml --node-name master
+    creates: /etc/kubernetes/admin.conf
+  when: inventory_hostname == groups['nodes'][0]
