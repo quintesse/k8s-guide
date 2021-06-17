@@ -1,0 +1,28 @@
+[Unit]
+Description=etcd - highly-available key value store
+Documentation=https://github.com/coreos/etcd
+Documentation=man:etcd
+After=network.target wg-quick@wg0.service
+Wants=network-online.target
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/etcd \
+  --name {{ shortname }} \
+  --data-dir /var/lib/etcd/default \
+  --listen-client-urls "http://{{ internal_ip }}:2379,http://localhost:2379" \
+  --advertise-client-urls "http://{{ internal_ip }}:2379" \
+  --listen-peer-urls "http://{{ internal_ip }}:2380" \
+  --initial-cluster "{% for item in groups['nodes'] %}{{ hostvars[item].shortname }}=http://{{ hostvars[item].internal_ip }}:2380,{% endfor %}" \
+  --initial-advertise-peer-urls "http://{{ internal_ip }}:2380" \
+  --heartbeat-interval 200 \
+  --election-timeout 5000
+User=etcd
+PermissionsStartOnly=true
+Restart=always
+RestartSec=5
+TimeoutStartSec=0
+StartLimitInterval=0
+
+[Install]
+WantedBy=multi-user.target

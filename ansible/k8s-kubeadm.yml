@@ -1,0 +1,23 @@
+---
+# This playbook creates a Kubernetes cluster
+
+- name: apply common configuration to all nodes
+  hosts: nodes
+  remote_user: root
+  any_errors_fatal: true
+
+  roles:
+  - lowlevel_setup
+  - wireguard
+  - etcd
+
+  tasks:
+#  - name: Display all variables/facts known for a host
+#    debug:
+#      var: hostvars[inventory_hostname]
+
+  handlers:
+  - name: reboot
+#    reboot:
+    debug:
+      msg: Should reboot now...

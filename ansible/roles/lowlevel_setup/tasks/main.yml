@@ -1,0 +1,104 @@
+---
+# tasks file for lowlevel_setup
+- name: set hostname
+  hostname:
+    name: "{{ shortname }}"
+  notify:
+  - reboot
+
+- name: update hosts file with FQDN and public IP
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '{{ hostvars[inventory_hostname].ansible_default_ipv4.address }}.*{{ inventory_hostname }}$'
+    line: "{{ hostvars[inventory_hostname].ansible_default_ipv4.address }} {{ inventory_hostname }}"
+    state: present
+  when: hostvars[inventory_hostname].ansible_default_ipv4.address is defined
+  notify:
+  - reboot
+
+- name: disable swap
+  shell:
+    cmd: swapoff -a
+  changed_when: false
+
+- name: remove swap from fstab
+  lineinfile:
+    dest: /etc/fstab
+    regexp: 'swap'
+    state: absent
+  notify:
+  - reboot
+
+- name: make sure IP forwarding is enabled
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: yes
+    state: present
+    reload: yes
+  notify:
+  - reboot
+
+- name: Update APT cache
+  apt:
+    update_cache: yes
+  changed_when: false
+
+- name: Install Docker
+  apt:
+    name: docker.io
+    state: present
+
+- name: Create Docker directory
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+    mode: 0755
+
+- name: Set Docker service options
+  copy:
+    dest: /etc/systemd/system/docker.service.d/10-docker-opts.conf
+    content: 'Environment="DOCKER_OPTS=--iptables=false --ip-masq=false"'
+    mode: 0644
+  notify:
+  - restart_docker
+
+- name: Set Docker options
+  copy:
+    dest: /etc/docker/daemon.json
+    content: |
+      {
+        "exec-opts": ["native.cgroupdriver=systemd"],
+        "log-driver": "json-file",
+        "log-opts": {
+          "max-size": "100m"
+        },
+        "storage-driver": "overlay2"
+      }
+    mode: 0644
+  notify:
+  - restart_docker
+
+- name: UFW - Set up allowed ports
+  community.general.ufw:
+    rule: allow
+    port: '{{ item }}'
+    state: enabled
+  loop:
+    - 'ssh'
+    - '6443'
+    - '80'
+    - '443'
+  notify:
+  - restart_ufw
+
+- name: UFW - Deny all incoming by default
+  community.general.ufw:
+    default: deny
+    direction: incoming
+    state: enabled
+  notify:
+  - restart_ufw
+
+- name: make sure we reboot if any of the previous steps was applied
+  meta: flush_handlers

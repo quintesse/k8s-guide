@@ -1,0 +1,18 @@
+---
+# tasks file setting up etcd
+- name: Install etcd
+  apt:
+    name: etcd
+    state: present
+
+- name: Configuring etcd
+  template:
+    src: etcd.service.j2
+    dest: /etc/systemd/system/etcd.service
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart_etcd
+
+- name: make sure we reboot if any of the previous steps was applied
+  meta: flush_handlers

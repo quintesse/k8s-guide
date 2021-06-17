@@ -1,0 +1,73 @@
+---
+# tasks file setting up Wireguard
+- name: Install Wireguard
+  apt:
+    name: wireguard
+    state: present
+
+- name: Generate private key
+  shell: wg genkey
+  register: wireguard_genkey
+  changed_when: false
+
+- name: Set the private key as a host fact
+  set_fact:
+    private_key: "{{ wireguard_genkey.stdout }}"
+
+- name: Generate public key
+  shell: "echo {{ private_key }} | wg pubkey"
+  register: wireguard_pubkey
+  changed_when: false
+
+- name: Set the public key as a host fact
+  set_fact:
+    public_key: "{{ wireguard_pubkey.stdout }}"
+
+- name: Set the private IP as a host fact
+  set_fact:
+    private_ip: "10.0.1.{{ groups['nodes'].index(inventory_hostname) + 1 }}"
+
+- name: Create wireguard directory
+  file:
+    path: /etc/wireguard
+    state: directory
+    mode: 0700
+
+- name: Configuring wireguard
+  template:
+    src: wg.conf.j2
+    dest: /etc/wireguard/wg0.conf
+    owner: root
+    group: root
+    mode: 0600
+  notify: restart_wireguard
+
+- name: update hosts file with short names and internal IPs of all nodes
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '{{ hostvars[item].internal_ip }}.*{{ hostvars[item].shortname }}$'
+    line: "{{ hostvars[item].internal_ip }} {{ hostvars[item].shortname }}"
+    state: present
+  with_items: "{{ play_hosts }}"
+
+- name: UFW - Allow incoming Wireguard traffic
+  community.general.ufw:
+    rule: allow
+    interface: eth0
+    direction: in
+    to_port: '51820'
+    state: enabled
+  notify:
+  - restart_ufw
+
+- name: UFW - Allow all incoming traffic on Wireguard interface
+  community.general.ufw:
+    rule: allow
+    interface: wg0
+    direction: in
+    state: enabled
+  notify:
+  - restart_ufw
+
+- name: make sure we reboot if any of the previous steps was applied
+  meta: flush_handlers
