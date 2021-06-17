@@ -1,9 +1,12 @@
 ---
 # tasks file setting up etcd
-- name: Install etcd
-  apt:
-    name: etcd
-    state: present
+- name: Unpack etcd
+  unarchive:
+    src: https://storage.googleapis.com/etcd/v{{ etcd_version }}/etcd-v{{ etcd_version }}-linux-amd64.tar.gz
+    remote_src: yes
+    dest: /opt/etcd
+    mode: 0755
+  notify: restart_etcd
 
 - name: Configuring etcd
   template:

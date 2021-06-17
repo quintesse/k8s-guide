@@ -7,9 +7,9 @@ Wants=network-online.target
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/etcd \
+ExecStart=/opt/etcd/etcd \
   --name {{ shortname }} \
-  --data-dir /var/lib/etcd/default \
+  --data-dir /var/lib/etcd \
   --listen-client-urls "http://{{ internal_ip }}:2379,http://localhost:2379" \
   --advertise-client-urls "http://{{ internal_ip }}:2379" \
   --listen-peer-urls "http://{{ internal_ip }}:2380" \
@@ -17,8 +17,6 @@ ExecStart=/usr/bin/etcd \
   --initial-advertise-peer-urls "http://{{ internal_ip }}:2380" \
   --heartbeat-interval 200 \
   --election-timeout 5000
-User=etcd
-PermissionsStartOnly=true
 Restart=always
 RestartSec=5
 TimeoutStartSec=0
