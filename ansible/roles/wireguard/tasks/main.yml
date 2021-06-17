@@ -23,10 +23,6 @@
   set_fact:
     public_key: "{{ wireguard_pubkey.stdout }}"
 
-- name: Set the private IP as a host fact
-  set_fact:
-    private_ip: "10.0.1.{{ groups['nodes'].index(inventory_hostname) + 1 }}"
-
 - name: Create wireguard directory
   file:
     path: /etc/wireguard
