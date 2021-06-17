@@ -5,40 +5,17 @@
     name: wireguard
     state: present
 
-- name: Generate private key
-  shell: wg genkey
-  register: wireguard_genkey
+- name: Check setup
+  shell: wg show wg0 dump
+  register: wireguard_check
+  ignore_errors: true
   changed_when: false
 
-- name: Set the private key as a host fact
-  set_fact:
-    private_key: "{{ wireguard_genkey.stdout }}"
+- name: Setup wireguard
+  include_tasks: setup.yml
+  when: wireguard_check is failed or ( wireguard_check.stdout_lines|length != play_hosts|length )
 
-- name: Generate public key
-  shell: "echo {{ private_key }} | wg pubkey"
-  register: wireguard_pubkey
-  changed_when: false
-
-- name: Set the public key as a host fact
-  set_fact:
-    public_key: "{{ wireguard_pubkey.stdout }}"
-
-- name: Create wireguard directory
-  file:
-    path: /etc/wireguard
-    state: directory
-    mode: 0700
-
-- name: Configuring wireguard
-  template:
-    src: wg.conf.j2
-    dest: /etc/wireguard/wg0.conf
-    owner: root
-    group: root
-    mode: 0600
-  notify: restart_wireguard
-
-- name: update hosts file with short names and internal IPs of all nodes
+- name: Update hosts file with short names and internal IPs of all nodes
   lineinfile:
     dest: /etc/hosts
     regexp: '{{ hostvars[item].internal_ip }}.*{{ hostvars[item].shortname }}$'
