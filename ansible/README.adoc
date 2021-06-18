@@ -1,0 +1,21 @@
+
+= Setting up a cluster using Ansible
+
+So in this document we're going to look at how we can
+automate the installation of a Kubernetes cluster using
+Ansible.
+
+For that we first need to
+https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-ansible-on-specific-operating-systems[install Ansible].
+
+After we've done that we need to add a couple of module "collections" by running:
+
+```
+$ ansible-galaxy collection install ansible.posix community.general community.kubernetes
+```
+
+After that installing/updating the cluster is simply done with:
+
+```
+$ ansible-playbook k8s-kubeadm.yml -i hosts
+```
