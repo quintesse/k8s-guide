@@ -52,3 +52,16 @@
   community.kubernetes.k8s:
     src: /opt/weave.yml
     state: present
+
+- name: Remove taint from nodes
+  command:
+    cmd: 'kubectl taint nodes --all node-role.kubernetes.io/master-'
+  changed_when: false
+  ignore_errors: true
+
+- name: Copy admin kube config locally
+  fetch:
+    src: /etc/kubernetes/admin.conf
+    dest: admin.conf
+    flat: yes
+  changed_when: false

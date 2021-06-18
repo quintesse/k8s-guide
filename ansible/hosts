@@ -7,3 +7,6 @@ kube3.k8s.codejive.org shortname=kube3 internal_ip=10.0.1.3
 cluster_name=takida-cluster
 domain=k8s.codejive.org
 api_domain=api.k8s.codejive.org
+
+[master]
+kube1.k8s.codejive.org shortname=kube1 internal_ip=10.0.1.1

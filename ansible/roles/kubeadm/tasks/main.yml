@@ -30,3 +30,9 @@
 - name: Setup K8s slave nodes
   include_tasks: slave.yml
   when: inventory_hostname != groups['nodes'][0]
+
+- name: Setup overlay network
+  include_tasks: weave.yml
+
+- name: make sure we reboot if any of the previous steps was applied
+  meta: flush_handlers

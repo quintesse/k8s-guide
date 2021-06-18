@@ -1,0 +1,8 @@
+---
+# handlers
+- name: restart_overlay_route
+  systemd:
+    name: 'overlay-route'
+    enabled: yes
+    state: restarted
+    daemon_reload: yes
