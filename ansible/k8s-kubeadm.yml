@@ -18,10 +18,7 @@
 #      var: hostvars[inventory_hostname]
 
   handlers:
-  - name: reboot
-#    reboot:
-    debug:
-      msg: Should reboot now...
+  - include: common-handlers.yml
 
   - name: restart_ufw
     community.general.ufw:

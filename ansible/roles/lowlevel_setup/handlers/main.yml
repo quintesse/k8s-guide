@@ -1,11 +1,8 @@
 ---
 # handlers
 - name: restart_docker
-  ansible.builtin.systemd:
+  systemd:
     name: docker
     enabled: yes
     state: restarted
-
-- name: restart_ufw
-  community.general.ufw:
-    state: reloaded
+    daemon_reload: yes

@@ -1,0 +1,10 @@
+---
+# handlers
+- name: restart_ufw
+  community.general.ufw:
+    state: reloaded
+
+- name: reboot
+#    reboot:
+  debug:
+    msg: Should reboot now...
