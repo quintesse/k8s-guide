@@ -1,7 +1,7 @@
 ---
 # This playbook creates a Kubernetes cluster
 
-- name: apply common configuration to all nodes
+- name: Set up K8s cluster
   hosts: nodes
   remote_user: root
   any_errors_fatal: true
@@ -12,14 +12,17 @@
   - etcd
   - kubeadm
 
-  tasks:
-#  - name: Display all variables/facts known for a host
-#    debug:
-#      var: hostvars[inventory_hostname]
-
   handlers:
   - include: common-handlers.yml
+  
+- name: Install apps on K8s cluster
+  hosts: master
+  remote_user: root
+  any_errors_fatal: true
 
-  - name: restart_ufw
-    community.general.ufw:
-      state: reloaded
+  roles:
+  - helm
+  - dashboard
+  - metrics
+  - ingress
+  - cert_manager

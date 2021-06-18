@@ -1,0 +1,43 @@
+---
+# tasks file setting up K8s Dashboard
+
+# TODO figure out why installing with Helm doesn't work
+# - name: Add Kubernetes Dashboard repo
+#   community.kubernetes.helm_repository:
+#     name: kubernetes-dashboard
+#     repo_url: "https://kubernetes.github.io/dashboard/"
+
+# - name: Deploy latest version of the Kubernetes Dashboard
+#   community.kubernetes.helm:
+#     name: dashboard
+#     chart_ref: kubernetes-dashboard/kubernetes-dashboard
+#     namespace: kubernetes-dashboard
+#     create_namespace: yes
+#     values:
+#       fullnameOverride: kubernetes-dashboard
+#       serviceAccount:
+#         name: admin-user
+#       metricsScraper:
+#         enabled: true
+
+- name: Download Dashboard manifest
+  get_url:
+    url: 'https://raw.githubusercontent.com/kubernetes/dashboard/v{{ dashboard_version }}/aio/deploy/recommended.yaml'
+    dest: /opt/dashboard.yml
+    mode: 0664
+    
+- name: Apply Dashboard manifest to the cluster
+  community.kubernetes.k8s:
+    src: /opt/dashboard.yml
+    state: present
+
+- name: Create Dashboard admin user manisfest
+  template:
+    src: dashboard-admin-user.yml.j2
+    dest: /opt/dashboard-admin-user.yml
+    mode: 0644
+
+- name: Apply Dashboard user manifest to the cluster
+  community.kubernetes.k8s:
+    src: /opt/dashboard-admin-user.yml
+    state: present

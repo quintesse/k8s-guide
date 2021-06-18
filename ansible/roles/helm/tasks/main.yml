@@ -1,0 +1,21 @@
+---
+# tasks file for installing Helm
+- name: Add Helm repository key
+  apt_key:
+    url: https://baltocdn.com/helm/signing.asc
+    state: present
+
+- name: Configure Helm repository
+  apt_repository:
+    repo: deb https://baltocdn.com/helm/stable/debian/ all main
+    state: present
+
+- name: Install Helm
+  apt:
+    name: helm
+    state: present
+
+- name: Install Helm diff plugin
+  community.kubernetes.helm_plugin:
+    plugin_path: https://github.com/databus23/helm-diff
+    state: present

@@ -1,0 +1,22 @@
+---
+# tasks file for setting up K8s Ingress
+
+- name: Add Kubernetes ingress-nginx repo
+  community.kubernetes.helm_repository:
+    name: ingress-nginx
+    repo_url: "https://kubernetes.github.io/ingress-nginx"
+
+- name: Create helm values file
+  template:
+    src: helm-ingress-values.yml.j2
+    dest: /opt/helm-ingress-values.yml
+    mode: 0644
+
+- name: Deploy latest version of ingress-nginx
+  community.kubernetes.helm:
+    name: ingress-nginx
+    chart_ref: ingress-nginx/ingress-nginx
+    namespace: ingress
+    create_namespace: yes
+    values_files:
+    - /opt/helm-ingress-values.yml

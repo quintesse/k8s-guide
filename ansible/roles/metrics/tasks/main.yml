@@ -1,0 +1,21 @@
+---
+# tasks file setting up K8s Metrics server
+
+- name: Add Kubernetes Bitnami repo
+  community.kubernetes.helm_repository:
+    name: bitnami
+    repo_url: "https://charts.bitnami.com/bitnami"
+
+- name: Deploy latest version of the Metrics server
+  community.kubernetes.helm:
+    name: metrics-server
+    chart_ref: bitnami/metrics-server
+    namespace: kube-system
+    values:
+      rbac:
+        create: true
+      apiService:
+        create: true
+      extraArgs:
+        kubelet-preferred-address-types: InternalIP
+        kubelet-insecure-tls: true
