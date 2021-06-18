@@ -1042,9 +1042,9 @@ outside world. We only have a couple of static IP addresses and opening
 ports and remembering what IP:port combination works for what service
 wouldn’t be very user-friendly. It would also be very inflexible.
 
-So that’s what https://github.com/kubernetes/ingress-nginx[NGINX Ingress
-Controller] is for, it will allow us to associate hostnames with our
-services. We’ve already set up a wild-card *.apps.k8s.example.com
+So that’s what https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx
+[NGINX Ingress Controller] is for, it will allow us to associate hostnames
+with our services. We’ve already set up a wild-card *.apps.k8s.example.com
 pointing to our *Kube1* node which means that we can use any subdomain
 for our services.
 
@@ -1089,6 +1089,75 @@ helm install \
   -f helm-ingress-values.xml
 ....
 
+==== Testing external access
+
+Now let see if it actually works (The following steps are adapted from https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/[this page]).
+
+Execute the following lines:
+
+```
+kubectl create ns test
+kubectl -n test create deployment web --image=gcr.io/google-samples/hello-app:1.0
+kubectl -n test expose deployment web --type=NodePort --port=8080
+```
+
+Now if we run `kubectl -n test get service web` we should see something like:
+
+```
+NAME      TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+web       NodePort   10.104.133.249   <none>        8080:31637/TCP   12m
+```
+
+But right now the service hasn't been exposed externally yet, so to test it
+we must first run the proxy: `kubectl proxy` and then we should be able to
+access the service using the following URL:
+
+http://localhost:8001/api/v1/namespaces/test/services/http:web:/proxy/
+
+Ok, great, but now lets use Ingress to access the service from outside the
+cluster. For that we must first create the following file:
+
+```
+cat > example-ingress.yml <<EOF
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+    - host: web.apps.k8s.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port:
+                  number: 8080
+EOF
+```
+
+And then we apply it using:
+
+```
+kubectl -n test apply -f example-ingress.yaml
+```
+
+Now if we run `kubectl -n test get ingress` we should see something like this:
+
+```
+NAME              CLASS    HOSTS                       ADDRESS   PORTS   AGE
+example-ingress   <none>   web.apps.k8s.example.com             80      6m17s
+```
+
+Which means everyhing went okay and you should now be able to access the service
+using the hostname defined in the file above (the web.apps.k8s.example.com host
+won't work, you have to change it for one that works for you. See the linked article
+for more information on how to do that).
+
 === Cert Manager
 
 Now that people can access our apps from the outside world we will want
@@ -1125,7 +1194,7 @@ Now we just need to tell it where to get the certificates from:
 
 ....
 cat > letsencrypt-issuer.yml <<EOF
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: letsencrypt-testing
@@ -1138,14 +1207,14 @@ spec:
     email: tako@example.com
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
-      name: letsencrypt-testing
+      name: letsencrypt-testing-key
     # Enable the HTTP-01 challenge provider
     solvers:
     - http01:
         ingress:
-          class:  nginx
+          class: nginx
 ---
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: letsencrypt
@@ -1158,12 +1227,12 @@ spec:
     email: tako@example.com
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
-      name: letsencrypt
+      name: letsencrypt-key
     # Enable the HTTP-01 challenge provider
     solvers:
     - http01:
         ingress:
-          class:  nginx
+          class: nginx
 EOF
 kubectl apply -f letsencrypt-issuer.yml
 ....
