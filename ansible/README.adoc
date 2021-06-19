@@ -3,18 +3,56 @@
 
 So in this document we're going to look at how we can
 automate the installation of a Kubernetes cluster using
-Ansible.
+https://www.ansible.com/resources/get-started[Ansible].
 
-For that we first need to
+But first we need to set up our servers!
+
+==== Server setup
+
+So let's start the very important job of ...
+
+xref:../prepare.adoc[Preparing the Servers]!
+
+Don't continue here until that is done!
+
+Okay.
+
+Now that are servers are partitioned and rebooted we start with the rest
+of the work.
+
+For that we'll' need to
 https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-ansible-on-specific-operating-systems[install Ansible].
 
-After we've done that we need to add a couple of module "collections" by running:
+And when that's done we need to add a couple of module "collections" by running:
 
 ```
 $ ansible-galaxy collection install ansible.posix community.general community.kubernetes
 ```
 
-After that installing/updating the cluster is simply done with:
+Now we need to take a look at the link:hosts[inventory file] and adapt it with
+the values we used during the server setup:
+
+```
+[nodes]
+kube1.k8s.example.com shortname=kube1 internal_ip=10.0.1.1
+kube2.k8s.example.com shortname=kube2 internal_ip=10.0.1.2
+kube3.k8s.example.com shortname=kube3 internal_ip=10.0.1.3
+
+[nodes:vars]
+cluster_name=my-first-cluster
+domain=k8s.example.com
+api_domain=api.k8s.example.com
+acme_email=user@example.com
+
+[master]
+kube1.k8s.example.com shortname=kube1 internal_ip=10.0.1.1
+```
+
+So all the domain names should be the ones you configured with your
+DNS provider / registrar. Also make sure to put in the admin's
+email address etc.
+
+After that installing/updating the cluster is just a simple command away:
 
 ```
 $ ansible-playbook k8s-kubeadm.yml -i hosts
