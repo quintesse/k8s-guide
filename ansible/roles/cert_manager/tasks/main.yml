@@ -14,3 +14,14 @@
     create_namespace: yes
     values:
       installCRDs: true
+
+- name: Create letsencrypt ACME Issuer manifest
+  template:
+    src: letsencrypt-issuer.yml.j2
+    dest: /opt/letsencrypt-issuer.yml
+    mode: 0644
+
+- name: Apply Issuer manifest to the cluster
+  community.kubernetes.k8s:
+    src: /opt/letsencrypt-issuer.yml
+    state: present
