@@ -1,0 +1,84 @@
+---
+# tasks file for creating a Kuard demo application
+
+- name: Create the kuard-demo Namespace
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        creationTimestamp: null
+        name: kuard-demo
+
+- name: Create a Deployment for Kuard
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: kuard
+        namespace: kuard-demo
+      spec:
+        selector:
+          matchLabels:
+            app: kuard
+        replicas: 1
+        template:
+          metadata:
+            labels:
+              app: kuard
+          spec:
+            containers:
+            - image: gcr.io/kuar-demo/kuard-amd64:1
+              imagePullPolicy: Always
+              name: kuard
+              ports:
+              - containerPort: 8080
+
+- name: Create a Service for Kuard
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: kuard
+        namespace: kuard-demo
+      spec:
+        ports:
+        - port: 80
+          targetPort: 8080
+          protocol: TCP
+        selector:
+          app: kuard
+
+- name: Create an Ingress for Kuard
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: kuard
+        namespace: kuard-demo
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+          cert-manager.io/cluster-issuer: "letsencrypt-testing"
+      spec:
+        tls:
+        - hosts:
+          - kuard.apps.k8s.codejive.org
+          secretName: kuard-demo-tls
+        rules:
+        - host: kuard.apps.k8s.codejive.org
+          http:
+            paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: kuard
+                  port:
+                    number: 80

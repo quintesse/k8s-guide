@@ -26,3 +26,4 @@
   - metrics
   - ingress
   - cert_manager
+  - kuard_demo
